@@ -9,7 +9,7 @@ npm install
 
 #### Compile smart contracts
 ```
-cd contract && truffle compile
+ruffle compile
 ```
 
 #### Deploy smart contract to rinkby network
@@ -21,5 +21,5 @@ truffle migrate --network rinkeby
 
 #### Test smart contract
 ```
-cd test & truffle test
+truffle test
 ```
