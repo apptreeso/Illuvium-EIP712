@@ -5,8 +5,6 @@
 
 ```
 npm install
-cd oz && npm install
-cd proxy && npm install
 ```
 
 #### Compile smart contracts
