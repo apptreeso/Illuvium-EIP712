@@ -9,7 +9,7 @@ npm install
 
 #### Compile smart contracts
 ```
-ruffle compile
+truffle compile
 ```
 
 #### Deploy smart contract to rinkby network
