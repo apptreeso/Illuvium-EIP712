@@ -16,7 +16,8 @@ contract BNT is ERC20 {
     mapping(address => address) backupList;
 
     // Blacklist
-    address[] blackList;
+    mapping(address => bool) blackList;
+
 
     // EIP712 type hash
     bytes32 constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)");
@@ -80,27 +81,23 @@ contract BNT is ERC20 {
         
         // Transfer all tokens to the backup address (if backup address is in the blacklist, transfer tokens to its backup address)
         require(backupList[whose] != address(0), "Backup address was not set");
-        require(backupList[whose] != whose, "Can't transfer the asset to the same address");
+        require(backupList[whose] != whose, "Can't transfer to the same address");
 
         address sender = whose; // 2
         address receiver = backupList[whose];   // 1
 
-        if (blackList.length > 0) {
-            for (uint i = 0; i < blackList.length; i++) {
-                if (receiver == blackList[i]) {
-                    if (backupList[receiver] == address(0)) revert("Token trasnfer to the addres in the blacklist123");
-                    for (uint j = 0; j < blackList.length; j++) {
-                        if (backupList[receiver] == blackList[j]) {
-                            revert("Token trasnfer to the addres in the blacklist333");
-                        }
-                    }
-                    // Prevent an attemp to transfer tokens to untrusted address
-                    blackList.push(receiver);
-                    // change the receiver
-                    receiver = backupList[receiver];
-                }
+        uint256 i = 0;
+        uint256 MAX_DEPTH = 10;
+        while (blackList[receiver] && i < MAX_DEPTH) {
+            if (backupList[receiver] == address(0)) {
+                revert("Can't trasnfer to the addres in the blacklist");
+            } else {
+                receiver = backupList[receiver];
             }
+
+            i++;
         }
+        if (i == MAX_DEPTH) revert("Overflow blacklist depth");
 
         uint256 balanceBefore = balanceOf(sender);
         _transfer(sender, receiver, balanceBefore);
@@ -108,7 +105,7 @@ contract BNT is ERC20 {
         require(balanceAfter <= balanceBefore, "Token transfer failed");
 
         // Prevent an attemp to transfer tokens to untrusted address
-        blackList.push(sender);
+        blackList[sender] = true;
 
         return true;
     }
